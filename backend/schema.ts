@@ -52,6 +52,12 @@ export const lists = {
         defaultValue: 5,
         ui: { description: 'Your personal rating (1–10)' },
       }),
+      reviewsCount: integer({
+        validation: {
+          isRequired: true,
+        },
+        defaultValue: 0,
+      }),
       imageURL: text({
         validation: { isRequired: false },
         ui: { description: 'URL to the noodle image' },
