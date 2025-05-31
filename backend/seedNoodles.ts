@@ -30,6 +30,7 @@ export async function seedNoodleData(context: Context) {
         spicinessLevel: item.spicinessLevel,
         originCountry: item.originCountry as InstantNoodleOriginCountryType,
         rating: item.rating,
+        reviewsCount: 0,
         imageURL: noodleImageUrls[i],
         category: { connect: { id: category.id } },
       },

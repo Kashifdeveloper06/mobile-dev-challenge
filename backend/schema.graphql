@@ -8,6 +8,7 @@ type InstantNoodle {
   spicinessLevel: Int
   originCountry: InstantNoodleOriginCountryType
   rating: Int
+  reviewsCount: Int
   imageURL: String
   category: Category
   createdAt: DateTime
