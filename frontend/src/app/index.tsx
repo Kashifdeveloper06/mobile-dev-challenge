@@ -5,24 +5,23 @@ import {
   ActivityIndicator,
   StyleSheet,
   FlatList,
+  Pressable,
 } from "react-native";
 import { useQuery } from "@apollo/client";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 
 import { GET_NOODLES } from "./queries";
 import { NoodleItem } from "./components/NoodleItem";
 import { useFilter } from "./filterContext/FilterContext";
 import NoodleFilters from "./components/NoodleFilters";
+import { Noodle } from "./types";
 
 export default function NoodleListScreen() {
   const { loading, error, data } = useQuery<{
-    instantNoodles: {
-      id: string; name: string;
-      spicinessLevel: string;
-      originCountry: string;
-    }[];
+    instantNoodles: Noodle[];
   }>(GET_NOODLES);
 
+  const router = useRouter();
   const {
     spicinessLevel,
     selectedCountry,
@@ -39,7 +38,19 @@ export default function NoodleListScreen() {
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ headerTitle: "Noodles" }} />
+      <Stack.Screen
+        options={{
+          headerTitle: "Noodles",
+          headerRight: () => (
+            <Pressable
+              style={styles.favouritesButton}
+              onPress={() => router.push("/favourites" as any)}>
+              <Text style={styles.favouritesText}>
+                {"Favourites"}
+              </Text>
+            </Pressable>
+          ),
+        }} />
       <NoodleFilters />
       <FlatList
         data={filteredData}
@@ -58,5 +69,7 @@ const styles = StyleSheet.create({
   loader: { flex: 1, justifyContent: "center", alignItems: "center" },
   error: { color: "red", padding: 16 },
   filtersContainer: { flexDirection: "row", gap: 16, marginBottom: 10 },
-  clearFilterButton: { backgroundColor: "white", borderRadius: 10 }
+  clearFilterButton: { backgroundColor: "white", borderRadius: 10 },
+  favouritesText: { color: "blue", fontWeight: "600" },
+  favouritesButton: { paddingRight: 10, width: 80 },
 });
