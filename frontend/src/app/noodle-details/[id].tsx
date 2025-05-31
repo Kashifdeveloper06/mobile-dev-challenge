@@ -7,7 +7,10 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
+import { Button } from "react-native-paper";
+
+import useFavourites from "../hooks/useFavorites";
 
 const GET_NOODLE_DETAILS = gql`
   query GetNoodleDetails($id: ID!) {
@@ -17,6 +20,7 @@ const GET_NOODLE_DETAILS = gql`
       brand
       spicinessLevel
       originCountry
+      reviewsCount
       rating
       imageURL
       category {
@@ -26,12 +30,53 @@ const GET_NOODLE_DETAILS = gql`
   }
 `;
 
+export const INCREMENT_REVIEWS_COUNT = gql`
+  mutation IncrementReviews($id: ID!, $newCount: Int!) {
+    updateInstantNoodle(where: { id: $id }, data: { reviewsCount: $newCount }) {
+      id
+      reviewsCount
+    }
+  }
+`;
+
 export default function NoodlesDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { loading, error, data } = useQuery(GET_NOODLE_DETAILS, {
+  const { loading, error, data, refetch } = useQuery(GET_NOODLE_DETAILS, {
     variables: { id },
     skip: !id,
   });
+
+  const [incrementReviews] = useMutation(INCREMENT_REVIEWS_COUNT);
+
+  const { markFavourite, unmarkFavourite, isFavourite } = useFavourites();
+
+  const handleLeaveReview = async () => {
+    if (!data?.instantNoodle) return;
+
+    const currentCount = data.instantNoodle.reviewsCount ?? 0;
+    const newCount = currentCount + 1;
+
+    try {
+      const response = await incrementReviews({
+        variables: {
+          id,
+          newCount,
+        },
+        optimisticResponse: {
+          updateInstantNoodle: {
+            id,
+            __typename: 'InstantNoodle',
+            reviewsCount: newCount,
+          },
+        },
+      });
+      console.log("response", response)
+      refetch();
+    } catch (e) {
+      alert('Failed to leave review.');
+    }
+  };
+
 
   if (loading) {
     return (
@@ -50,6 +95,7 @@ export default function NoodlesDetails() {
   }
 
   const noodle = data.instantNoodle;
+  const isFav = isFavourite(noodle);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -71,7 +117,21 @@ export default function NoodlesDetails() {
         <Text style={styles.tag}>🔥{"🔥".repeat(noodle.spicinessLevel)}</Text>
         <Text style={styles.tag}>⭐ {noodle.rating}/10</Text>
         <Text style={styles.tag}>📦 {noodle.category?.name}</Text>
+        <Text style={styles.tag}>💬 {noodle.reviewsCount ?? 0}</Text>
       </View>
+      <Button
+        style={styles.favButton}
+        onPress={() => {
+          if (isFav) unmarkFavourite(noodle)
+          else markFavourite(noodle)
+        }}>
+        {isFav ? "Remove from Favourites" : "Add to Favourites"}
+      </Button>
+      <Button
+        style={styles.favButton}
+        onPress={handleLeaveReview}>
+        {"Leave Review"}
+      </Button>
     </ScrollView>
   );
 }
@@ -117,4 +177,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 8,
   },
+  favButton: {
+    marginTop: 16,
+    backgroundColor: "white"
+  }
 });
