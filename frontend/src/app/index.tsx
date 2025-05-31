@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -11,8 +11,8 @@ import { Stack } from "expo-router";
 
 import { GET_NOODLES } from "./queries";
 import { NoodleItem } from "./components/NoodleItem";
-import MenuPicker from "./components/MenuPicker";
-import { Button } from "react-native-paper";
+import { useFilter } from "./filterContext/FilterContext";
+import NoodleFilters from "./components/NoodleFilters";
 
 export default function NoodleListScreen() {
   const { loading, error, data } = useQuery<{
@@ -23,8 +23,10 @@ export default function NoodleListScreen() {
     }[];
   }>(GET_NOODLES);
 
-  const [spicinessLevel, setSpicinessLevel] = useState<string | null>(null);
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const {
+    spicinessLevel,
+    selectedCountry,
+  } = useFilter();
 
   const filteredData = data?.instantNoodles.filter(item => {
     const matchSpiciness = !spicinessLevel || `${item.spicinessLevel}` === spicinessLevel;
@@ -35,66 +37,10 @@ export default function NoodleListScreen() {
   if (loading) return <ActivityIndicator style={styles.loader} size="large" />;
   if (error) return <Text style={styles.error}>Error: {error.message}</Text>;
 
-  const renderFilters = () => {
-    return (
-      <View style={styles.filtersContainer}>
-        <View style={{ flex: 1 }}>
-          <MenuPicker
-            value={spicinessLevel}
-            placeHolder={"Spiciness Level"}
-            onSelect={(value) => setSpicinessLevel(value)}
-            data={[
-              { label: 'Level 1', value: 1 },
-              { label: 'Level 2', value: 2 },
-              { label: 'Level 3', value: 3 },
-              { label: 'Level 4', value: 4 },
-              { label: 'Level 5', value: 5 },
-            ]}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          <MenuPicker
-            value={selectedCountry}
-            placeHolder={"Origin Country"}
-            onSelect={(value) => setSelectedCountry(value)}
-            data={[
-              { label: 'South Korea', value: 'south_korea' },
-              { label: 'Indonesia', value: 'indonesia' },
-              { label: 'Malaysia', value: 'malaysia' },
-              { label: 'Thailand', value: 'thailand' },
-              { label: 'Japan', value: 'japan' },
-              { label: 'Singapore', value: 'singapore' },
-              { label: 'Vietnam', value: 'vietnam' },
-              { label: 'China', value: 'china' },
-              { label: 'Taiwan', value: 'taiwan' },
-              { label: 'Philippines', value: 'philippines' },
-            ]}
-          />
-        </View>
-      </View>
-    )
-  }
-
-  const renderResetFilter = () => {
-    if (spicinessLevel || selectedCountry) {
-      return (
-        <Button
-          style={styles.clearFilterButton}
-          onPress={() => {
-            setSpicinessLevel(null)
-            setSelectedCountry(null)
-          }}>
-          {"Clear Filter"}
-        </Button>
-      )
-    } else return null
-  }
-
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerTitle: "Noodles" }} />
-      {renderFilters()}
-      {renderResetFilter()}
+      <NoodleFilters />
       <FlatList
         data={filteredData}
         keyExtractor={(item) => item.id}
