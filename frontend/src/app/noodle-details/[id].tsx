@@ -8,6 +8,9 @@ import {
   StyleSheet,
 } from "react-native";
 import { gql, useQuery } from "@apollo/client";
+import { Button } from "react-native-paper";
+
+import useFavourites from "../hooks/useFavorites";
 
 const GET_NOODLE_DETAILS = gql`
   query GetNoodleDetails($id: ID!) {
@@ -33,6 +36,8 @@ export default function NoodlesDetails() {
     skip: !id,
   });
 
+  const { markFavourite, unmarkFavourite, isFavourite } = useFavourites();
+
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -50,6 +55,7 @@ export default function NoodlesDetails() {
   }
 
   const noodle = data.instantNoodle;
+  const isFav = isFavourite(noodle);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -72,6 +78,14 @@ export default function NoodlesDetails() {
         <Text style={styles.tag}>⭐ {noodle.rating}/10</Text>
         <Text style={styles.tag}>📦 {noodle.category?.name}</Text>
       </View>
+      <Button
+        style={styles.favButton}
+        onPress={() => {
+          if (isFav) unmarkFavourite(noodle)
+          else markFavourite(noodle)
+        }}>
+        {isFav ? "Remove from Favourites" : "Add to Favourites"}
+      </Button>
     </ScrollView>
   );
 }
@@ -117,4 +131,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 8,
   },
+  favButton: {
+    marginTop: 16,
+    backgroundColor: "white"
+  }
 });
