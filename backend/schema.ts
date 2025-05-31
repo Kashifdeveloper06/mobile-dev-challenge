@@ -11,6 +11,27 @@ import { allowAll } from '@keystone-6/core/access';
 export const lists = {
   InstantNoodle: list({
     access: allowAll,
+    hooks: {
+      async resolveInput({ resolvedData, item, operation }) {
+        if (
+          operation === 'update' &&
+          resolvedData.reviewsCount &&
+          item?.reviewsCount
+        ) {
+          const oldCount = item.reviewsCount;
+          const newCount = resolvedData.reviewsCount;
+
+          if (newCount < oldCount) {
+            throw new Error('reviewsCount cannot be decreased');
+          }
+
+          if (newCount > oldCount) {
+            resolvedData.lastReviewedAt = new Date().toISOString();
+          }
+        }
+        return resolvedData;
+      },
+    },
     fields: {
       name: text({
         validation: { isRequired: true },
@@ -52,6 +73,13 @@ export const lists = {
         defaultValue: 5,
         ui: { description: 'Your personal rating (1–10)' },
       }),
+      reviewsCount: integer({
+        validation: {
+          isRequired: true,
+        },
+        defaultValue: 0,
+      }),
+      lastReviewedAt: timestamp(),
       imageURL: text({
         validation: { isRequired: false },
         ui: { description: 'URL to the noodle image' },

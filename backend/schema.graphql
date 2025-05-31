@@ -8,6 +8,8 @@ type InstantNoodle {
   spicinessLevel: Int
   originCountry: InstantNoodleOriginCountryType
   rating: Int
+  reviewsCount: Int
+  lastReviewedAt: DateTime
   imageURL: String
   category: Category
   createdAt: DateTime
@@ -42,6 +44,8 @@ input InstantNoodleWhereInput {
   spicinessLevel: IntFilter
   originCountry: InstantNoodleOriginCountryTypeNullableFilter
   rating: IntFilter
+  reviewsCount: IntFilter
+  lastReviewedAt: DateTimeNullableFilter
   imageURL: StringFilter
   category: CategoryWhereInput
   createdAt: DateTimeNullableFilter
@@ -122,6 +126,8 @@ input InstantNoodleOrderByInput {
   spicinessLevel: OrderDirection
   originCountry: OrderDirection
   rating: OrderDirection
+  reviewsCount: OrderDirection
+  lastReviewedAt: OrderDirection
   imageURL: OrderDirection
   createdAt: OrderDirection
 }
@@ -137,6 +143,8 @@ input InstantNoodleUpdateInput {
   spicinessLevel: Int
   originCountry: InstantNoodleOriginCountryType
   rating: Int
+  reviewsCount: Int
+  lastReviewedAt: DateTime
   imageURL: String
   category: CategoryRelateToOneForUpdateInput
   createdAt: DateTime
@@ -159,6 +167,8 @@ input InstantNoodleCreateInput {
   spicinessLevel: Int
   originCountry: InstantNoodleOriginCountryType
   rating: Int
+  reviewsCount: Int
+  lastReviewedAt: DateTime
   imageURL: String
   category: CategoryRelateToOneForCreateInput
   createdAt: DateTime
